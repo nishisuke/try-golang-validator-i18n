@@ -41,6 +41,8 @@ func printError(err error) {
 		return
 	}
 
+	fmt.Println(ve)
+
 	for _, err := range ve {
 		fmt.Println("Namespace", err.Namespace())
 		fmt.Println("Field", err.Field())
