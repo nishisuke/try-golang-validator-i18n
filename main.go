@@ -5,7 +5,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/go-playground/locales/ja"
+	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	ja_translations "github.com/go-playground/validator/v10/translations/ja"
 )
 
 type value struct {
@@ -22,14 +25,21 @@ func main() {
 		Color:      "red",
 	}
 
+	ja := ja.New()
+	uni := ut.New(ja, ja)
+
+	trans, ok := uni.GetTranslator("ja")
+	_ = ok
+
 	validate := validator.New(validator.WithRequiredStructEnabled())
+	ja_translations.RegisterDefaultTranslations(validate, trans)
 
 	// Level 0
 	err := validate.StructCtx(ctx, val)
-	printError(err)
+	printError(err, trans)
 }
 
-func printError(err error) {
+func printError(err error, trans ut.Translator) {
 	if err == nil {
 		fmt.Println("No error")
 		return
@@ -41,7 +51,7 @@ func printError(err error) {
 		return
 	}
 
-	fmt.Println(ve)
+	fmt.Println(ve.Translate(trans))
 
 	for _, err := range ve {
 		fmt.Println("Namespace", err.Namespace())
