@@ -15,6 +15,7 @@ type value struct {
 	FamilyName string `validate:"required"`
 	FirstName  string `validate:"min=10"`
 	Color      string `validate:"iscolor"`
+	Birthdate  string `validate:"datetime=2006-01-02"`
 }
 
 func main() {
