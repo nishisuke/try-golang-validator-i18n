@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 
 	"github.com/go-playground/locales/ja"
 	ut "github.com/go-playground/universal-translator"
@@ -34,6 +35,20 @@ func main() {
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	ja_translations.RegisterDefaultTranslations(validate, trans)
+
+	validate.RegisterTagNameFunc(func(field reflect.StructField) string {
+		dict := map[string]string{
+			"FamilyName": "名字",
+			"FirstName":  "名前",
+			"Color":      "色",
+			"Birthdate":  "生年月日",
+		}
+		if name, ok := dict[field.Name]; ok {
+			return name
+		}
+
+		return field.Name
+	})
 
 	// Level 0
 	err := validate.StructCtx(ctx, val)
