@@ -33,7 +33,9 @@ func main() {
 	uni := ut.New(ja, ja)
 
 	trans, ok := uni.GetTranslator("ja")
-	_ = ok
+	if !ok {
+		log.Fatal("translator not found")
+	}
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	err := ja_translations.RegisterDefaultTranslations(validate, trans)
@@ -65,7 +67,9 @@ func main() {
 			p = strings.Replace(p, "02", "DD", 1)
 
 			v, err := ut.T("datetime", fe.Field(), p)
-			log.Println(err)
+			if err != nil {
+				log.Println(err)
+			}
 			return v
 		})
 	if err != nil {
@@ -89,9 +93,8 @@ func printError(err error, trans ut.Translator) {
 		return
 	}
 
-	fmt.Println(ve.Translate(trans))
-
 	for _, err := range ve {
+		fmt.Println(err.Translate(trans))
 		fmt.Println("Namespace", err.Namespace())
 		fmt.Println("Field", err.Field())
 		fmt.Println("StructNamespace", err.StructNamespace())
