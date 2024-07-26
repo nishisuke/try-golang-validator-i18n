@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"reflect"
 	"strings"
@@ -46,16 +45,16 @@ func printError(err error, uni *ut.UniversalTranslator, lang string) {
 	var ve validator.ValidationErrors
 
 	if !errors.As(err, &ve) {
-		fmt.Printf("Unknown error: %s\n", err)
+		log.Printf("Unknown error: %s\n", err)
 		return
 	}
 	trans, ok := uni.GetTranslator(lang)
 	if !ok {
-		fmt.Println(ve)
+		log.Println(ve)
 	}
 
 	for _, err := range ve {
-		fmt.Println(err.Translate(trans))
+		log.Println(err.Translate(trans))
 	}
 }
 
