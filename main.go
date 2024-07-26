@@ -20,6 +20,8 @@ type user struct {
 	Birthdate  string `validate:"datetime=2006-01-02"`
 }
 
+const langJA = "ja"
+
 func main() {
 	ctx := context.Background()
 	val := user{
@@ -27,19 +29,47 @@ func main() {
 		FirstName:  "John",
 	}
 
+	validate := validator.New(validator.WithRequiredStructEnabled())
 	ja := ja.New()
 	uni := ut.New(ja, ja)
-
-	trans, ok := uni.GetTranslator("ja")
-	if !ok {
-		log.Fatal("translator not found")
+	err := registerTranslator(validate, uni, langJA)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	validate := validator.New(validator.WithRequiredStructEnabled())
+	if err := validate.StructCtx(ctx, val); err != nil {
+		printError(err, uni, langJA)
+	}
+}
+
+func printError(err error, uni *ut.UniversalTranslator, lang string) {
+	var ve validator.ValidationErrors
+
+	if !errors.As(err, &ve) {
+		fmt.Printf("Unknown error: %s\n", err)
+		return
+	}
+	trans, ok := uni.GetTranslator(lang)
+	if !ok {
+		fmt.Println(ve)
+	}
+
+	for _, err := range ve {
+		fmt.Println(err.Translate(trans))
+	}
+}
+
+func registerTranslator(validate *validator.Validate, uni *ut.UniversalTranslator, lang string) error {
+	trans, ok := uni.GetTranslator(lang)
+	if !ok {
+		log.Println("translator not found")
+		return nil
+	}
+
 	// level1
 	err := ja_translations.RegisterDefaultTranslations(validate, trans)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// level2
@@ -69,12 +99,12 @@ func main() {
 			return v
 		})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// level4
 	err = validate.RegisterTranslation("datetime", trans, func(ut ut.Translator) error {
-		return ut.Add("datetime", "{0} は {1} の形式ではありません", true)
+		return ut.Add("datetime", "{0}は{1}の形式で入力してください", true)
 	},
 		func(ut ut.Translator, fe validator.FieldError) string {
 			p := fe.Param()
@@ -89,26 +119,7 @@ func main() {
 			return v
 		})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-
-	err = validate.StructCtx(ctx, val)
-	printError(err, trans)
-}
-
-func printError(err error, trans ut.Translator) {
-	if err == nil {
-		fmt.Println("No error")
-		return
-	}
-	var ve validator.ValidationErrors
-
-	if !errors.As(err, &ve) {
-		fmt.Printf("Unknown error: %s\n", err)
-		return
-	}
-
-	for _, err := range ve {
-		fmt.Println(err.Translate(trans))
-	}
+	return nil
 }
