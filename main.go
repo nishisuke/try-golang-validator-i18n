@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
+	"strings"
 
 	"github.com/go-playground/locales/ja"
 	ut "github.com/go-playground/universal-translator"
@@ -34,7 +36,10 @@ func main() {
 	_ = ok
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
-	ja_translations.RegisterDefaultTranslations(validate, trans)
+	err := ja_translations.RegisterDefaultTranslations(validate, trans)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	validate.RegisterTagNameFunc(func(field reflect.StructField) string {
 		dict := map[string]string{
@@ -50,8 +55,25 @@ func main() {
 		return field.Name
 	})
 
+	err = validate.RegisterTranslation("datetime", trans, func(ut ut.Translator) error {
+		return ut.Add("datetime", "{0} は {1} の形式ではありません", true)
+	},
+		func(ut ut.Translator, fe validator.FieldError) string {
+			p := fe.Param()
+			p = strings.Replace(p, "2006", "YYYY", 1)
+			p = strings.Replace(p, "01", "MM", 1)
+			p = strings.Replace(p, "02", "DD", 1)
+
+			v, err := ut.T("datetime", fe.Field(), p)
+			log.Println(err)
+			return v
+		})
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Level 0
-	err := validate.StructCtx(ctx, val)
+	err = validate.StructCtx(ctx, val)
 	printError(err, trans)
 }
 
