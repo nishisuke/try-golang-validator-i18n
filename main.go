@@ -36,11 +36,13 @@ func main() {
 	}
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
+	// level1
 	err := ja_translations.RegisterDefaultTranslations(validate, trans)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// level2
 	validate.RegisterTagNameFunc(func(field reflect.StructField) string {
 		dict := map[string]string{
 			"FamilyName": "名字",
