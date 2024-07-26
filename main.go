@@ -14,7 +14,7 @@ import (
 	ja_translations "github.com/go-playground/validator/v10/translations/ja"
 )
 
-type value struct {
+type user struct {
 	FamilyName string `validate:"required"`
 	FirstName  string `validate:"min=10"`
 	Color      string `validate:"iscolor"`
@@ -23,7 +23,7 @@ type value struct {
 
 func main() {
 	ctx := context.Background()
-	val := value{
+	val := user{
 		FamilyName: "",
 		FirstName:  "John",
 		Color:      "red",
