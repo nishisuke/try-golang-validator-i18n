@@ -57,6 +57,22 @@ func main() {
 		return field.Name
 	})
 
+	// level3
+	err = validate.RegisterTranslation("required", trans, func(ut ut.Translator) error {
+		return ut.Add("required", "{0}を入力してください", true)
+	},
+		func(ut ut.Translator, fe validator.FieldError) string {
+			v, err := ut.T("required", fe.Field())
+			if err != nil {
+				log.Println(err)
+			}
+			return v
+		})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// level4
 	err = validate.RegisterTranslation("datetime", trans, func(ut ut.Translator) error {
 		return ut.Add("datetime", "{0} は {1} の形式ではありません", true)
 	},
