@@ -17,7 +17,6 @@ import (
 type user struct {
 	FamilyName string `validate:"required"`
 	FirstName  string `validate:"min=10"`
-	Color      string `validate:"iscolor"`
 	Birthdate  string `validate:"datetime=2006-01-02"`
 }
 
@@ -26,7 +25,6 @@ func main() {
 	val := user{
 		FamilyName: "",
 		FirstName:  "John",
-		Color:      "red",
 	}
 
 	ja := ja.New()
@@ -92,7 +90,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Level 0
 	err = validate.StructCtx(ctx, val)
 	printError(err, trans)
 }
@@ -111,14 +108,5 @@ func printError(err error, trans ut.Translator) {
 
 	for _, err := range ve {
 		fmt.Println(err.Translate(trans))
-		fmt.Println("Namespace", err.Namespace())
-		fmt.Println("Field", err.Field())
-		fmt.Println("StructNamespace", err.StructNamespace())
-		fmt.Println("StructField", err.StructField())
-		fmt.Println("Tag", err.Tag())
-		fmt.Println("Type", err.Type())
-		fmt.Println("Value", err.Value())
-		fmt.Println("Param", err.Param())
-		fmt.Println("----")
 	}
 }
